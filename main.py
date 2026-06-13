@@ -9,7 +9,7 @@ def closest_color_manhattan(target_rgb, parsed_palette):
     closest_color = None
     min_distance = float('inf')
     for color in parsed_palette:
-        r, g, b, *__ = color
+        r, g, b = color[:3]
         distance = abs(r - target_r) + abs(g - target_g) + abs(b - target_b)
         if distance < min_distance:
             min_distance = distance
@@ -25,14 +25,16 @@ def walk_files(directory):
 def recolor_picture(image_path, parsed_palette):
     img = Image.open(image_path).convert('RGBA')
     rgba_array = image_to_rgba_array(image_path)
-    for x in range(len(rgba_array)):
-        for y in range(len(rgba_array[x])):
-            pixel = rgba_array[x][y]
+
+    for y in range(len(rgba_array)):
+        for x in range(len(rgba_array[y])):
+            pixel = rgba_array[y][x]
             if pixel[3] != 0:
                 new_color = closest_color_manhattan(pixel, parsed_palette)
                 if len(new_color) < 4:
-                    new_color.append(255)
-                img.putpixel((y, x), tuple(new_color))
+                    new_color = list(new_color) + [255]
+                img.putpixel((x, y), tuple(new_color))
+
     save_path = f'result/{image_path.split("Source")[-1]}'
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     img.save(save_path)
@@ -57,78 +59,66 @@ def recolor_folder(folder_dir, parsed_palette):
 def parse_palette(palette_file_dir):
     with open(palette_file_dir) as file:
         file_data = file.readlines()
-        file_data.pop(0)
+        if file_data:
+            file_data.pop(0)
+
         new_file_data = []
         for line in file_data:
-            if line[0] != '#':
-                new_file_data.append(line)
+            if line.strip() and line[0] != '#':
+                new_file_data.append(line.strip())
         file_data = new_file_data
+
+        if not file_data:
+            return []
 
         separator = None
         for i, char in enumerate(file_data[0]):
-            if char in '0123456789':
-                if not file_data[0][i + 1] in '0123456789':
+            if char.isdigit():
+                if i + 1 < len(file_data[0]) and not file_data[0][i + 1].isdigit():
                     separator = file_data[0][i + 1]
                     break
+        if separator is None:
+            separator = None
 
         parsed_palette = []
         for line in file_data:
-            splitted_line = line.split(separator)
-            if separator != '\t':
-                splitted_line[-1] = splitted_line[-1].split('\t')[0]
-            new_splitted_line = []
-            for char in splitted_line:
-                if char != '':
-                    new_splitted_line.append(char)
-            splitted_line_color_part = new_splitted_line[:3]
+            if separator:
+                splitted_line = line.split(separator)
+            else:
+                splitted_line = line.split()
 
-            parsed_palette.append(list(map(int, splitted_line_color_part)))
-            print(list(map(int, splitted_line_color_part)))
+            color_values = []
+            for part in splitted_line:
+                part = part.strip()
+                if part and len(color_values) < 3:
+                    try:
+                        color_values.append(int(part))
+                    except ValueError:
+                        continue
+
+            if len(color_values) == 3:
+                parsed_palette.append(color_values)
+                print(color_values)
 
     return parsed_palette
-
 
 folder_dir = filedialog.askdirectory(
     title="Выберите папку со спрайтами для реколора",
     initialdir="C:/",
     mustexist=True
 )
+
 palette_file_dir = filedialog.askopenfilename(
     title="Выберите целевую палитру",
     initialdir="C:/",
     defaultextension=".gpl",
-    filetypes=[("Палитры GIMP", "*.gpl"),]
+    filetypes=[("Палитры GIMP", "*.gpl")]
 )
+
 try:
     os.mkdir('result')
-except: pass
-
-parsed_palette = parse_palette(palette_file_dir)
-recolor_folder(folder_dir, parsed_palette)
-
-print('Готово! Результаты сохранены в папочку result')
-= new_splitted_line[:3]
-
-            parsed_palette.append(list(map(int, splitted_line_color_part)))
-            print(list(map(int, splitted_line_color_part)))
-
-    return parsed_palette
-
-
-folder_dir = filedialog.askdirectory(
-    title="Выберите папку со спрайтами для реколора",
-    initialdir="C:/",
-    mustexist=True
-)
-palette_file_dir = filedialog.askopenfilename(
-    title="Выберите целевую палитру",
-    initialdir="C:/",
-    defaultextension=".gpl",
-    filetypes=[("Палитры GIMP", "*.gpl"),]
-)
-try:
-    os.mkdir('result')
-except: pass
+except FileExistsError:
+    pass
 
 parsed_palette = parse_palette(palette_file_dir)
 recolor_folder(folder_dir, parsed_palette)
