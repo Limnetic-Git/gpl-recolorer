@@ -1,36 +1,36 @@
 # Sprite Recolorer
 
-Утилита для пакетной перекраски спрайтов (PNG) в соответствии с заданной палитрой GIMP (.gpl). Ищет ближайший цвет по манхэттенскому расстоянию и заменяет каждый непрозрачный пиксель изображения.
+A utility for batch recoloring of sprites (PNG) according to a specified GIMP palette (.gpl). It finds the nearest color using Manhattan distance and replaces every opaque pixel of the image.
 
-## Возможности
+## Features
 
-- 🖼️ Поддержка любых PNG-изображений с альфа-каналом
-- 🎯 Пакетная обработка — рекурсивный обход всех вложенных папок
-- 📊 Алгоритм поиска ближайшего цвета по сумме модулей разницы каналов (Manhattan distance)
-- 🔄 Сохранение структуры исходных папок в директории `result`
-- 🧩 Поддержка палитр GIMP формата `.gpl`
+- 🖼️ Supports any PNG images with alpha channel
+- 🎯 Batch processing — recursively traverses all nested folders
+- 📊 Nearest color search algorithm using the sum of absolute channel differences (Manhattan distance)
+- 🔄 Preserves the original folder structure in the result directory
+- 🧩 Supports GIMP palette format .gpl
 
-## Требования
+## Requirements
 
 - Python 3.6+
 - Pillow (PIL)
 
-## Установка
+## Installation
 
 ```bash
 git clone https://github.com/your-username/sprite-recolorer.git
 cd sprite-recolorer
 pip install pillow
 ```
-- Запустите скрипт:
+- Run script:
 ```bash
 python recolorer.py
 ```
-- Выберите папку со спрайтами для перекраски
-- Выберите файл палитры .gpl
-- Дождитесь завершения - результат появится в папке result/
+- Select the folder containing sprites to recolor
+- Select a `.gpl` palette file
+- Wait for completion — the result will appear in the `result/` folder
 
-**MIT License - делайте с этим кодом что хотите :)**
+**MIT License - free to use, do what u want :)**
 
-⭐ Звёздочка проекту, если он оказался полезным!
+⭐ Star the project if you found it useful!
 
